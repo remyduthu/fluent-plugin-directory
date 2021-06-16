@@ -20,19 +20,18 @@ module Fluent
     class DirectoryInput < Fluent::Plugin::Input
       Fluent::Plugin.register_input('directory', self)
 
-      desc 'The name of the key whose value is the content of the file.'
+      helpers :timer
+
+      desc 'The field where the content of the file is stored in the output event.'
       config_param :content_key, :string, default: 'content'
 
-      desc 'The extension that will be added to the processed files.'
-      config_param :extension, :string, default: '.done'
-
-      desc 'The name of the key whose value is the name of the file.'
+      desc 'The field where the name of the file is stored in the output event.'
       config_param :filename_key, :string, default: 'filename'
 
-      desc 'The path of the folder to be scanned by the plugin.'
+      desc 'The path of the folder to scan.'
       config_param :path, :string
 
-      desc 'The time interval (in seconds) to wait between scans.'
+      desc 'The interval (in seconds) to wait between scans.'
       config_param :run_interval, :integer, default: 60
 
       desc 'The tag added to the output event.'
@@ -41,9 +40,9 @@ module Fluent
       def start
         super
 
-        begin
-          # Scan files indefinitely
-          loop do
+        # See: https://docs.fluentd.org/plugin-helper-overview/api-plugin-helper-timer
+        timer_execute(:directory_timer, @run_interval) do
+          begin
             # Use a stream to submit multiple events at the same time
             multiEventStream = MultiEventStream.new
 
@@ -52,28 +51,22 @@ module Fluent
 
             # Read filenames in the directory
             Dir.glob(@path + '/*') do |filename|
-              # Ignore already processed files
-              next if filename.end_with? @extension
-
               # Add the record to the stream
               multiEventStream.add(
                 time,
-                { @content_key => File.read(filename), @file_key => filename }
+                { @content_key => File.read(filename), @file_key => filename },
               )
 
-              # Mark the file as processed
-              File.rename(filename, filename + @extension)
+              # Remove the file
+              File.delete(filename)
             end
 
             # Send the events
             router.emit_stream(tag, multiEventStream)
-
-            # Wait before the next scan
-            sleep(@run_interval)
+          rescue Exception => e
+            $log.warn 'Directory input error: ', e
+            $log.debug_backtrace(e.backtrace)
           end
-        rescue Exception => e
-          $log.warn 'Directory input error: ', e
-          $log.debug_backtrace(e.backtrace)
         end
       end
     end

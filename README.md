@@ -28,29 +28,23 @@ $ bundle
 
 ### content_key (string) (optional)
 
-The name of the key whose value is the content of the file.
+The field where the content of the file is stored in the output event.
 
 Default value: `content`.
 
-### extension (string) (optional)
-
-The extension that will be added to the processed files.
-
-Default value: `.done`.
-
 ### filename_key (string) (optional)
 
-The name of the key whose value is the name of the file.
+The field where the name of the file is stored in the output event.
 
 Default value: `filename`.
 
 ### path (string) (required)
 
-The path of the folder to be scanned by the plugin.
+The path of the folder to scan.
 
 ### run_interval (integer) (optional)
 
-The time interval (in seconds) to wait between scans.
+The interval (in seconds) to wait between scans.
 
 Default value: `60`.
 
@@ -58,10 +52,8 @@ Default value: `60`.
 
 The tag added to the output event.
 
-- See also: [Input Plugin Overview](https://docs.fluentd.org/v/1.0/input#overview)
-
 ## Copyright
 
-- Copyright(c) 2021- TODO: Write your name
+- Copyright(c) 2021- Rémy DUTHU
 - License
   - Apache License, Version 2.0
