@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-directory"
   spec.version = "0.1.2"
-  spec.authors = ["remyduthu@icloud.com"]
+  spec.authors = ["Rémy DUTHU"]
   spec.email   = ["remyduthu@icloud.com"]
 
   spec.summary       = "A Fluentd input plugin to scan files recurrently from a directory"
