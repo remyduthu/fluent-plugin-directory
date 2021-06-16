@@ -54,7 +54,7 @@ module Fluent
               # Add the record to the stream
               multiEventStream.add(
                 time,
-                { @content_key => File.read(filename), @file_key => filename },
+                { @content_key => File.read(filename), @filename_key => filename },
               )
 
               # Remove the file
