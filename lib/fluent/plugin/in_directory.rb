@@ -63,9 +63,8 @@ module Fluent
 
             # Send the events
             router.emit_stream(tag, multiEventStream)
-          rescue Exception => e
-            $log.warn 'Directory input error: ', e
-            $log.debug_backtrace(e.backtrace)
+          rescue StandardError
+            yield(nil, nil)
           end
         end
       end
