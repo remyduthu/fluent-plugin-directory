@@ -22,6 +22,9 @@ module Fluent
 
       helpers :timer
 
+      desc 'The maximum number of files processed in each run.'
+      config_param :batch_size, :integer, default: 10
+
       desc 'The field where the content of the file is stored in the output event.'
       config_param :content_key, :string, default: 'content'
 
@@ -50,16 +53,22 @@ module Fluent
             time = Fluent::Engine.now
 
             # Read filenames in the directory
-            Dir.glob(@path + '/*') do |filename|
-              # Add the record to the stream
-              multiEventStream.add(
-                time,
-                { @content_key => File.read(filename), @filename_key => filename },
-              )
+            Dir
+              .glob(@path + '/*')
+              .take(@batch_size)
+              .each do |filename|
+                # Add the record to the stream
+                multiEventStream.add(
+                  time,
+                  {
+                    @content_key => File.read(filename),
+                    @filename_key => filename
+                  }
+                )
 
-              # Remove the file
-              File.delete(filename)
-            end
+                # Remove the file
+                File.delete(filename)
+              end
 
             # Send the events
             router.emit_stream(tag, multiEventStream)
